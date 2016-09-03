@@ -1,6 +1,6 @@
 // Load the NPM Packages
 var twitter = require('twitter');
-var spotify = require('spotify-web-api-node');
+var spotify = require('spotify');
 var request = require('request');
 var fs = require('fs');
 
@@ -47,7 +47,7 @@ function tweets20() {
 	});
 
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
-	  	if (!error) {
+	  	if (!error) {  // Successful tweet extraction!
 			console.log("=========================================");
 			for (var i=0; i<tweets.length; i++) {
 				var tweetDate = tweets[i].created_at;
@@ -63,8 +63,29 @@ function tweets20() {
 }
 
 function spots(songName) {
+	// If songName was left blank, then it defaults to the song, "The Sign" by Ace of Base
+	if (!songName) {
+		console.log("No song requested!  Defaulting to...");
+		songName = "The Sign";
+	}
 
+	// Create a request for the song track
+	spotify.search({ type: 'track', query: '"' + songName + '"'}, function(err, data) {
+		if (err) {
+			console.log("Error with song search!");
+			return;
+		} else { // Successful song search!
+			var object = data.tracks.items[0];
+			
+			console.log("");
+			console.log("Song: " + object.name);
+			console.log("Album: " + object.album.name);
+			console.log("Artist(s): " + object.artists[0].name);
+			console.log("Spotify preview link: " + object.preview_url);
 
+			// console.log(JSON.stringify(object, null, 4));
+		}
+	});
 }
 
 function movies(movieName) {
@@ -82,7 +103,7 @@ function movies(movieName) {
 
 	// Create a request for the queryUrl
 	request(queryUrl, function (error, response, body) {
-		// If the request is successful
+		// Successful movie search!
 		if (!error && response.statusCode == 200) { 
 
 			var object = JSON.parse(body);
@@ -97,6 +118,8 @@ function movies(movieName) {
 			console.log("Actors: " + object.Actors);
 			console.log("Rotten Tomatoes Rating: " + object.tomatoRating);
 			console.log("Rotten Tomatoes URL: " + object.tomatoURL);
+		} else {
+			console.log("Error with movie search!");
 		}
 	});
 }
@@ -105,7 +128,7 @@ function does() {
 	fs.readFile("random.txt", "utf8", function (err, data) {
 		// Break the str by comma separation, and Store in outputArray
 		var outputArray = data.split(",");
-		console.log("Doing another command very soon!");
+		console.log("Doing a somewhat random command very soon...");
 		whichCommand(outputArray[0], outputArray[1]);
 	});
 }
